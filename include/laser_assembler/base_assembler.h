@@ -247,6 +247,13 @@ void BaseAssembler<T>::msgCallback(const boost::shared_ptr<const T>& scan_ptr)
 
   // Add the current scan (now of type PointCloud) into our history of scans
   scan_hist_mutex_.lock() ;
+  if (!(scan_hist_.begin()->header.stamp < cur_cloud.header.stamp))
+  {
+      ROS_WARN("Jump back in time detected. Deleting scan buffer!");
+      scan_hist_.clear();
+      total_pts_ = 0;
+  }
+
   if (scan_hist_.size() == max_scans_)                           // Is our deque full?
   {
     total_pts_ -= scan_hist_.front().points.size () ;            // We're removing an elem, so this reduces our total point count
